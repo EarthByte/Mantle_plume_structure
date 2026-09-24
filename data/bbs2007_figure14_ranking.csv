@@ -1,0 +1,54 @@
+# Boschi, Becker and Steinberger (2007), doi:10.1029/2007GC001733, Figure 14.
+# The figure plots, for each of 44 modelled advected plume conduits, the fraction
+# of the conduit on which the masked normalised anomaly is below -0.15 per cent,
+# for five tomographic models, and sorts the hotspots by the average of those.
+# Only the ORDER is transcribed here, which is all a rank comparison needs; no
+# values are estimated from symbol positions. Rank 1 is the top of their figure,
+# described there as most likely to have deep mantle origin.
+# East Africa is kept under their own name: it sits about a thousand kilometres
+# from Courtillot's Afar, and their text states Afar was not included here.
+rank,hotspot
+1,"Tahiti/Society"
+2,"East Africa"
+3,"Reunion"
+4,"Macdonald (Cook-Austral)"
+5,"Samoa"
+6,"Kerguelen(Heard)"
+7,"Canary"
+8,"Azores"
+9,"Iceland"
+10,"Hawaii"
+11,"Comores"
+12,"Tristan"
+13,"Pitcairn"
+14,"Cape Verde"
+15,"Darfur"
+16,"Caroline"
+17,"Marquesas"
+18,"Cameroon"
+19,"Balleny"
+20,"Galapagos"
+21,"Easter"
+22,"Great Meteor/New England"
+23,"Jan Mayen"
+24,"Marion"
+25,"St Helena"
+26,"San Felix"
+27,"Meteor"
+28,"Vema"
+29,"Juan Fernandez"
+30,"Socorro"
+31,"Fernando"
+32,"Eifel"
+33,"Bowie"
+34,"Tibesti"
+35,"Juan de Fuca/Cobb"
+36,"Hoggar"
+37,"Baja/Guadalupe"
+38,"Martin/Trindade"
+39,"Louisville"
+40,"Lord Howe (Tasman East)"
+41,"Tasmanid (Tasman central)"
+42,"Yellowstone"
+43,"Raton"
+44,"Australia E"

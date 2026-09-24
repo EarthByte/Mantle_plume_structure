@@ -1,0 +1,50 @@
+hotspot,lat,lon_180,count,he_ratio
+Afar,10.0,43.0,4,high
+Ascension,-8.0,-14.0,0,
+Australia E,-38.0,143.0,1,
+Azores,39.0,-28.0,1,high
+Baja/Guadalupe,27.0,-113.0,0,low
+Balleny,-67.0,163.0,0,
+Bermuda,33.0,-67.0,0,
+Bouvet,-54.0,2.0,1,high
+Bowie,53.0,-135.0,2,
+Cameroon,4.0,9.0,0,
+Canary,28.0,-20.0,2,low
+Cape Verde,14.0,-20.0,2,high
+Caroline,5.0,164.0,3,high
+Comores,-12.0,43.0,0,
+Crozet/Pr. Edward,-45.0,50.0,0,
+Darfur,13.0,24.0,0,
+Discovery,-42.0,0.0,1,high
+Easter,-27.0,-110.0,4,high
+Eifel,50.0,7.0,0,
+Fernando,-4.0,-32.0,0,
+Galapagos,0.0,-92.0,2,high
+Great Meteor/New England,28.0,-32.0,0,
+Hawaii,20.0,-156.0,4,high
+Hoggar,23.0,6.0,1,
+Iceland,65.0,-20.0,4,high
+Jan Mayen,71.0,-8.0,1,
+Juan de Fuca/Cobb,46.0,-130.0,2,
+Juan Fernandez,-34.0,-83.0,2,high
+Kerguelen(Heard),-49.0,69.0,2,high
+Louisville,-51.0,-141.0,3,
+Lord Howe (Tasman East),-33.0,159.0,1,
+Macdonald (Cook-Austral),-30.0,-140.0,2,high
+Marion,-47.0,38.0,1,
+Marquesas,-10.0,-138.0,2,low
+Martin/Trindade,-20.0,-29.0,0,
+Meteor,-52.0,1.0,0,
+Pitcairn,-26.0,-130.0,2,high
+Raton,37.0,-104.0,1,
+Reunion,-21.0,56.0,4,high
+St Helena,-17.0,-20.0,1,low
+Samoa,-14.0,-170.0,4,high
+San Felix,-26.0,-80.0,1,
+Socorro,19.0,-111.0,1,
+Tahiti/Society,-18.0,-150.0,2,high
+Tasmanid (Tasman central),-39.0,156.0,2,
+Tibesti,21.0,17.0,0,
+Tristan,-37.0,-12.0,3,low
+Vema,-33.0,4.0,0,
+Yellowstone,44.0,-111.0,2,high

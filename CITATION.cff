@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: If you use this repository, cite the paper below.
+title: "Mantle_plume_structure: code and figures for 'Mantle plume conduits are most prominent beneath the mid-mantle viscosity increase'"
+version: 1.0.0
+date-released: 2026-09-24
+license: MIT
+repository-code: https://github.com/EarthByte/Mantle_plume_structure
+authors:
+  - family-names: Müller
+    given-names: R. Dietmar
+    affiliation: EarthByte Group, School of Geosciences, The University of Sydney
+  - family-names: Fichtner
+    given-names: Andreas
+    affiliation: Department of Earth and Planetary Sciences, ETH Zürich
+  - family-names: Schiller
+    given-names: Carl Josef
+    affiliation: Department of Earth and Planetary Sciences, ETH Zürich
+preferred-citation:
+  type: article
+  title: "Mantle plume conduits are most prominent beneath the mid-mantle viscosity increase"
+  journal: Geochemistry, Geophysics, Geosystems
+  year: 2026
+  authors:
+    - family-names: Müller
+      given-names: R. Dietmar
+    - family-names: Fichtner
+      given-names: Andreas
+    - family-names: Schiller
+      given-names: Carl Josef

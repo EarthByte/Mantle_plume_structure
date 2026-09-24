@@ -1,0 +1,12 @@
+# Derived products are not carried in the repository; see README for how to
+# rebuild them with src/run_all.sh.
+out/
+results/
+logs/
+# Large tomographic inputs are obtained from their sources; see README.
+data/tomography/*.nc
+data/*.nc
+__pycache__/
+*.pyc
+.DS_Store
+.venv-figcheck/

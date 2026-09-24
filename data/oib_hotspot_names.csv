@@ -1,0 +1,56 @@
+# Courtillot et al. (2003) hotspot names against the names used in the ocean
+# island basalt database of Hardardottir and Jackson (2025). Matched by hand:
+# the two catalogues split and merge hotspots differently, and the supplement
+# spells them differently in its per-hotspot table and its sample-level sheet,
+# so a fuzzy match silently returns no samples for the best-sampled hotspots.
+# Blank oibid_name means no clean counterpart: continental, or absent.
+hotspot,oibid_name
+"Ascension","Ascension"
+"Azores","Azores"
+"Baja/Guadalupe","Baja-Guadalupe"
+"Balleny","Balleny"
+"Bermuda","Bermuda"
+"Bouvet","Bouvet"
+"Bowie","Bowie-Pratt Welker"
+"Cameroon","Cameroon"
+"Canary","Canary"
+"Cape Verde","Cape Verde"
+"Caroline","Caroline"
+"Comores","Comores"
+"Crozet/Pr. Edward","Crozet"
+"Discovery","Discovery"
+"Easter","Easter"
+"Fernando","Fernando de Noronha"
+"Galapagos","Galapagos"
+"Great Meteor/New England","New England"
+"Hawaii","Hawaii"
+"Iceland","Iceland"
+"Jan Mayen","Jan Mayen"
+"Juan Fernandez","Juan Fernandez"
+"Juan de Fuca/Cobb","Cobb-Axial-Juan de Fuca"
+"Kerguelen(Heard)","Heard-Kerguelen"
+"Louisville","Louisville"
+"Macdonald (Cook-Austral)","Macdonald"
+"Marion","Marion-Prince Edward"
+"Marquesas","Marquesas"
+"Martin/Trindade","Trindade-Martin Vas"
+"Meteor","Meteor-Shona"
+"Pitcairn","Pitcairn"
+"Reunion","Reunion"
+"Samoa","Samoa"
+"San Felix","San Felix"
+"Socorro","Socorro-Revillagigedo"
+"St Helena","St. Helena"
+"Tahiti/Society","Societies"
+"Tasmanid (Tasman central)","Tasmantid-Tasman Central"
+"Tristan","Tristan-Gough-Walvis Ridge"
+"Afar",
+"Australia E",
+"Darfur",
+"Eifel",
+"Hoggar",
+"Raton",
+"Tibesti",
+"Yellowstone",
+"Lord Howe (Tasman East)",
+"Vema",

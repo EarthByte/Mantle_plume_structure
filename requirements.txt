@@ -1,0 +1,14 @@
+numpy
+scipy
+pandas
+xarray
+netCDF4
+matplotlib
+pygmt
+geopandas
+shapely
+scikit-learn
+openpyxl
+pygplates
+plate-model-manager
+gplately
