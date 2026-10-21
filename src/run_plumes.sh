@@ -9,9 +9,7 @@ ROOT="${ROOT:-$HOME/Documents/Papers/in_prep/Muller_mantle_tomography_subduction
 find_tomo () {
   local c
   for c in "${TOMO:-}" \
-           "$ROOT/REVEAL_mantle_tomography" \
-           "/Volumes/ZeitwissenDataSSD/archive/Muller_mantle_tomography_subduction/REVEAL_mantle_tomography" \
-           "/Volumes/ZeitwissenDataSSD/REVEAL_mantle_tomography"; do
+           "$ROOT/REVEAL_mantle_tomography"; do
     [ -n "$c" ] && [ -f "$c/RevealLO.nc" ] && { echo "$c"; return; }
   done
   echo "$ROOT/REVEAL_mantle_tomography"

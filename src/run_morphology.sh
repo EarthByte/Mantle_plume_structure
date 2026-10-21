@@ -33,20 +33,13 @@ cd "$(dirname "$0")"
 mkdir -p out figures
 
 ROOT="$HOME/Documents/Papers/in_prep/Muller_mantle_tomography_subduction"
-SSD="${SSD:-/Volumes/ZeitwissenDataSSD}"
 
-# The tomographic models are large and may have been moved to an external disk.
-# Rather than hard-coding one location, the first candidate that actually holds
-# RevealLO.nc is used, so moving the folder does not mean editing scripts, and
-# an unplugged SSD produces the ordinary "not found, skipping" path rather than
-# a run that silently uses a stale copy. TOMO in the environment overrides all
-# of it.
+# The tomographic models live in the project folder on the internal disk. TOMO in
+# the environment overrides that, so a run against a copy elsewhere needs no edit.
 find_tomo () {
   local c
   for c in "${TOMO:-}" \
-           "$ROOT/REVEAL_mantle_tomography" \
-           "$SSD/archive/Muller_mantle_tomography_subduction/REVEAL_mantle_tomography" \
-           "$SSD/REVEAL_mantle_tomography"; do
+           "$ROOT/REVEAL_mantle_tomography"; do
     [ -n "$c" ] && [ -f "$c/RevealLO.nc" ] && { echo "$c"; return; }
   done
   echo "$ROOT/REVEAL_mantle_tomography"
@@ -54,34 +47,10 @@ find_tomo () {
 TOMO="$(find_tomo)"
 echo "tomographic models: $TOMO"
 
-# Where the smoothed copies are written and read. They belong with the model they
-# were made from, so if the tomography folder is on the external disk they follow
-# it there; otherwise the external disk is used when it is mounted and the
-# internal one only when it is not. Set SMOOTH_DIR to override.
-find_smooth_dir () {
-  local c
-  case "$TOMO" in /Volumes/*) echo "$TOMO"; return;; esac
-  for c in "$SSD/archive/Muller_mantle_tomography_subduction/REVEAL_mantle_tomography" \
-           "$SSD/REVEAL_mantle_tomography"; do
-    [ -d "$c" ] && { echo "$c"; return; }
-  done
-  if [ -d "$SSD" ]; then
-    echo "$SSD/archive/Muller_mantle_tomography_subduction/REVEAL_mantle_tomography"
-  else
-    echo "$TOMO"
-  fi
-}
-SMOOTH_DIR="${SMOOTH_DIR:-$(find_smooth_dir)}"
+# Smoothed copies are written beside the model they were made from. Set SMOOTH_DIR
+# to put them elsewhere.
+SMOOTH_DIR="${SMOOTH_DIR:-$TOMO}"
 echo "smoothed copies:    $SMOOTH_DIR"
-
-# A smoothed copy written to one disk and then looked for on another is not an
-# error a run should discover halfway through, so a missing external disk is
-# reported here, once, while it can still be acted on.
-for _d in "$TOMO" "$SMOOTH_DIR"; do
-  case "$_d" in
-    /Volumes/*) [ -d "$_d" ] || echo "!! $_d is not there; is the external disk mounted?" >&2;;
-  esac
-done
 AGES="$ROOT/Papers/Chase_Wessel_2022_data/PHT2021_raw_data/PHT2021_pacific_ages.txt"
 
 PAPER_MODEL=RevealLO
