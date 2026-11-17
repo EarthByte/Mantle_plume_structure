@@ -390,7 +390,7 @@ step_derived () {
           --tag "$PAPER_MODEL"      2>&1 | tee logs/bao_pdf.log         || rc=1
   # The depth census reads the paths, the ambient paths and the column products, so it
   # runs here again (it ran in step_columns too, which may precede a retrace of the
-  # paths) and feeds Figure 6, Tables S4-S5 and the audit.
+  # paths) and feeds Figure 4, Tables S4-S5 and the audit.
   python3 mid_mantle_census.py     2>&1 | tee logs/mid_mantle_census.log || rc=1
   python3 path_reliability.py --tag "$PAPER_MODEL" --control RevealLO_30km \
                                    2>&1 | tee logs/path_reliability.log || rc=1
@@ -403,9 +403,9 @@ step_derived () {
   python3 apm_crossmodel.py        2>&1 | tee logs/apm_crossmodel.log   || rc=1
   python3 lean_confirm.py --tags RevealLO,REVEAL,GLADM35,SPiRaL,SEMUCB-WM1,RevealLO_30km \
                                    2>&1 | tee logs/lean_confirm.log     || rc=1
-  # The pre-registered ridge test (Text S3, Figure 4c) was in no runner: Text S3
+  # The pre-registered ridge test (Text S3, Figure 6c) was in no runner: Text S3
   # quoted 24 near and 15 far paths at P = 0.657 and 0.963, traced under the
-  # superseded configuration, beside a Figure 4c drawn from the current paths.
+  # superseded configuration, beside a Figure 6c drawn from the current paths.
   # It now writes out/ridge_lean_<tag>.csv and the audit reads it.
   python3 ridge_lean_confirm.py --tags RevealLO,REVEAL,GLADM35 \
                                    2>&1 | tee logs/ridge_lean_confirm.log || rc=1
@@ -504,8 +504,8 @@ step_nulls () {
 # ---------------------------------------------------------------- 5b. columns
 # Two surface-anchored measurements that depend on the model alone and not on the
 # path configuration: the connected slow column beneath each site (root_depth.py,
-# section 3.1, Figure 6a, Table S4) and the tracked local minimum with its prominence
-# (conduit_detect.py, section 3.2, Figure 6b, Table S5). Both ran once on 6-7 September,
+# section 3.1, Figure 4a, Table S4) and the tracked local minimum with its prominence
+# (conduit_detect.py, section 3.2, Figure 4b, Table S5). Both ran once on 6-7 September,
 # outside every runner and without provenance; mid_mantle_census.py reads them, so
 # they run here, for every model, with the null seeds their scripts fix. The _xm suffix
 # on the conduit profiles of the non-paper models is the one run_crossmodel_prominence.sh
@@ -536,7 +536,7 @@ step_columns () {
 }
 
 # ------------------------------------------------------------- 8. calibration
-# The injection sweeps behind section 3.7 and Figure 7. corridor_width_calibrate.py reads
+# The injection sweeps behind section 3.8 and Figure 8. corridor_width_calibrate.py reads
 # path_config and passes c.s and c.channel into cost_field, so its output moves with the
 # configuration like everything else - and it was in no runner, so three of the four
 # occupancy sweeps stood at the move set and channel of three different earlier days while

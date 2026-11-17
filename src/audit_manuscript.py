@@ -689,7 +689,7 @@ if os.path.exists(_pr):
                 chk(f'tilt, {tlt_name}', float(tlt_s.loc[tlt_name, 'tilt']), tlt_q, 0.06, ' deg')
     else:
         missing.append('plume_slant_RevealLO.csv (the four tilts of section 3.4)')
-    # The ridge test of Text S3 and Figure 4c, written by ridge_lean_confirm.py.
+    # The ridge test of Text S3 and Figure 6c, written by ridge_lean_confirm.py.
     tlt_rl = os.path.join(A.dir, 'ridge_lean_RevealLO.csv')
     if os.path.exists(tlt_rl):
         tlt_r = pd.read_csv(tlt_rl).set_index('group')
@@ -762,7 +762,7 @@ if missing:
     print()
 
 # ---------------------------------------------------------------- the depth census
-# Sections 3.1, 3.2 and 3.6, Figure 6, Tables S4-S6: everything read from
+# Sections 3.1, 3.2 and 3.6, Figure 4, Tables S4-S6: everything read from
 # out/mid_mantle_summary.csv, which mid_mantle_census.py writes from the paths, the
 # ambient paths, root_depth_<tag>.csv, conduit_profile_<tag>[_xm].csv and the
 # corridor profiles. Values are quoted as the text quotes them.

@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: If you use this repository, cite the paper below.
 title: "Mantle_plume_structure: code and figures for 'Full-waveform tomography reveals deep mantle plume conduits with non-unique source regions'"
-version: 1.0.0
-date-released: 2026-11-16
+version: 1.0.1
+date-released: 2026-11-17
 license: MIT
 repository-code: https://github.com/EarthByte/Mantle_plume_structure
 authors:

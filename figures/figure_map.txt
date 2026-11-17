@@ -2,9 +2,9 @@
 1  fig1_map.png
 2  fig2_workflow.png
 3  fig3_corridor.png
-4  fig4_lean.png
-5  fig6_bands.png
-6  fig10_province.png
+4  fig6_bands.png
+5  fig10_province.png
+6  fig4_lean.png
 7  fig7_deflection.png
 8  fig8_calibration.png
 9  fig9_sections_p1.png

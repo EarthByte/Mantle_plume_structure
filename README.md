@@ -4,7 +4,7 @@ Code, figures and derived data for
 
 > Müller, R. D., Fichtner, A., & Schiller, C. J. (2026). Full-waveform tomography reveals deep mantle plume conduits with non-unique source regions. *Geochemistry, Geophysics, Geosystems*.
 
-Whether global tomography resolves mantle plume conduits was disputed for two decades, and the debate largely subsided: ray-based whole-mantle models changed little over the following decade, and the vertical smoothing that had made early finite-frequency models appear plume-rich was itself called into question. Nonlinear full-waveform inversion, fit to far larger seismic datasets, now resolves whole-mantle structure differently, making it timely to revisit these questions. The full-waveform models REVEAL and RevealLO now show slow columns beneath most hotspots, opening opportunities for detailed plume geometry analysis. We trace least-cost descending paths beneath 49 hotspots and from 300 ambient locations (sites at least 1500 km from any hotspot, used throughout as a control for what the search itself can produce), calibrate them with injected synthetic conduits, and analyse their properties by depth against the ambient population. A connected slow column reaches the base of the mantle beneath 22–27% of hotspots against 4–7% of random sites, a contrast other tomography models render weakly or not at all. However, many plume columns are shown to be intermittent. Hotspot conduits are more prominent beneath the lower mantle viscosity increase inferred across 800–1200 km rather than above it. In RevealLO, our preferred model, hotspot paths are more inclined than ambient paths at 1000–1500 km (19° against 14°, *P* = 0.003) and nowhere else. Deflections show no horizon: the 800–1200 km range of the viscosity increase holds at most 1.5 times the deflections expected from its thickness, ambient paths deflect at the same depths, and corridor width grows smoothly with depth as the resolving length. The lower mantle viscosity increase is thus expressed as plume column prominence and inclination beneath it. Traced endpoints lie within the low-velocity provinces 2.6 times more often than matched ambient endpoints, at no preferred position, and 33 of 49 hotspots have a second column within 3% of cost ending a median 808 km away. Tomography with the current generation of models therefore does not always uniquely determine an individual plume's source, even where plume conduits are imaged.
+Whether global tomography resolves mantle plume conduits was disputed for two decades. The full-waveform models REVEAL and RevealLO, fit to far larger seismic datasets, now show slow columns beneath most hotspots. We trace least-cost descending paths beneath 49 hotspots and from 300 ambient locations (sites at least 1500 km from any hotspot, a control for what the search itself can produce), calibrate them with injected synthetic conduits, and analyze their properties by depth against the ambient population. A connected slow column reaches the base of the mantle beneath 22–27% of hotspots against 4–7% of random sites, a contrast other tomography models render weakly or not at all, although many plume columns are intermittent. Hotspot conduits are more prominent beneath the lower mantle viscosity increase inferred across 800–1200 km than above it, and in RevealLO, our preferred model, hotspot paths are more inclined than ambient paths at 1000–1500 km (19° against 14°, *P* = 0.003) and nowhere else. Deflections show no horizon: the 800–1200 km range holds at most 1.5 times the deflections expected from its thickness, and ambient paths deflect at the same depths. The viscosity increase is thus expressed as plume column prominence and inclination beneath it. Traced endpoints lie within the low-velocity provinces 2.6 times more often than matched ambient endpoints, and 33 of 49 hotspots have a second column within 3% of cost ending a median 808 km away. Current tomography therefore does not always uniquely determine an individual plume's source, even where conduits are imaged.
 
 A conduit is represented as the **cheapest descending path** through a tomographic shear-velocity model. A step of physical length `L` through material whose anomaly is `a` per cent costs
 
@@ -56,11 +56,11 @@ figures/        the twelve main-text and supplementary figures S1-S8, PDF and PN
 
 **None of the tomographic model files used here are redistributed in this repository.**
 
-Every model file used in this study was provided by the Seismology and Wave Physics group at ETH Zürich. **RevealLO is described by Schiller et al. (2026) and is being archived by its authors; see the paper's Open Research section for its DOI.** The other four are published models, obtainable from their authors at the references below; the copies used here are ETH-prepared and will not be byte-identical to the authors' own distributions, so a run from an independently obtained copy may differ in detail from the numbers in the paper.
+Every model file used in this study was provided by the Seismology and Wave Physics group at ETH Zürich. **RevealLO is described by Schiller et al. (2026, arXiv:2611.21322) and archived by its authors at https://doi.org/10.5281/zenodo.23646069.** The other four are published models, obtainable from their authors at the references below; the copies used here are ETH-prepared and will not be byte-identical to the authors' own distributions, so a run from an independently obtained copy may differ in detail from the numbers in the paper.
 
 | model | as used here | reference |
 |---|---|---|
-| RevealLO | 0.5°, 10 km depth, cropped at 2880 km | Schiller et al. (2026), ETH Zürich, Seismology and Wave Physics |
+| RevealLO | 0.5°, 10 km depth, cropped at 2880 km | Schiller et al. (2026), https://doi.org/10.5281/zenodo.23646069 |
 | REVEAL | 0.5° | Thrastarson et al. (2024), *BSSA* 114, 1392-1406 |
 | GLAD-M35 | 1°, every 2nd shell | Cui et al. (2024), *GJI* 239, 478-502 |
 | SPiRaL | as distributed | Simmons et al. (2021), *GJI* 227, 1366-1391 |
@@ -118,9 +118,9 @@ cd src && ./refigure.sh        # or ./refigure.sh GLADM35 for one model
 python3 src/fig1_map.py          # Figure 1: hotspots and traced paths
 python3 src/fig_workflow.py      # Figure 2: workflow
 python3 src/fig_corridor.py      # Figure 3: near-optimal corridor width
-python3 src/fig_lean.py          # Figure 4: directional tests of path lean
-python3 src/fig_bands.py         # Figure 5: where conduits differ from ambient mantle, by depth
-python3 src/fig_province.py      # Figure 6: traced endpoints and the lowermost-mantle slow provinces
+python3 src/fig_bands.py         # Figure 4: where conduits differ from ambient mantle, by depth
+python3 src/fig_province.py      # Figure 5: traced endpoints and the lowermost-mantle slow provinces
+python3 src/fig_lean.py          # Figure 6: directional tests of path lean
 python3 src/fig_deflection.py    # Figure 7: distribution of path-deflection depths
 python3 src/fig_calibration.py   # Figure 8: synthetic calibration of corridor width
 python3 src/sections_figure.py --all              # Figures 9-12: the 49-hotspot cross-section atlas
@@ -166,7 +166,7 @@ Courtillot, V., Davaille, A., Besse, J., & Stock, J. (2003). Three distinct type
 Cui, C., et al. (2024). GLAD-M35. *Geophysical Journal International*, 239, 478-502. https://doi.org/10.1093/gji/ggae270
 French, S. W., & Romanowicz, B. A. (2014). SEMUCB-WM1. *Geophysical Journal International*, 199, 1303-1327. https://doi.org/10.1093/gji/ggu334
 MacLeod, C. J., et al. (2017). Extinct and active spreading ridge segments. Supplementary dataset.
-Schiller, C. J., et al. (2026). RevealLO. Full reference in the paper.
+Schiller, C. J., Keating, S., Afanasiev, M., Marty, P., & Fichtner, A. (2026). RevealLO: Global-scale FWI including long-period major-arc surface wave and multi-orbit body wave data. arXiv:2611.21322. Model: https://doi.org/10.5281/zenodo.23646069
 Simmons, N. A., et al. (2021). SPiRaL. *Geophysical Journal International*, 227, 1366-1391.
 Thrastarson, S., et al. (2024). REVEAL. *Bulletin of the Seismological Society of America*, 114, 1392-1406.
 Zahirovic, S., et al. (2022). Plate model reconstruction.

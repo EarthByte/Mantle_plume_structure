@@ -1,6 +1,6 @@
 """Figure: deep endpoints against low-velocity provinces (Section 3.3).
 
-Section 3.2 has Figure 5 as its visual summary; Section 3.3 had none, which is what
+Section 3.2 has Figure 4 as its visual summary; Section 3.3 had none, which is what
 prompted this (Fichtner, review of G3_MS_v13, comment 44). Three panels, all in
 RevealLO, all read from files already written by the pipeline so the figure cannot
 disagree with the text: (a) the share of endpoints inside a large low-shear-velocity
