@@ -978,6 +978,37 @@ if os.path.exists(_tp) and os.path.exists(_tc):
 else:
     missing.append('tasman_plume_site_profile.csv / tasman_slab_compare.csv')
 
+# Section 3.7: corridor network membership. These numbers went unchecked once and sat
+# on an overlap file from an earlier set of corridors for six weeks; they are checked here.
+_cnp = {m: os.path.join(A.dir, f'corridor_network_{m}.csv') for m in ('RevealLO', 'REVEAL', 'GLADM35')}
+if all(os.path.exists(v) for v in _cnp.values()):
+    _cn = pd.read_csv(_cnp['RevealLO'])
+    _sizes = _cn[_cn.degree > 0].component.value_counts()
+    _ncomp = {s: int(n // s) for s, n in _sizes.items()}
+    chk('network: isolated RevealLO paths', int((_cn.degree == 0).sum()), 26, 0, '')
+    chk('network: linked RevealLO paths', int((_cn.degree > 0).sum()), 23, 0, '')
+    chk('network: components of two or more', sum(_ncomp.values()), 10, 0, '')
+    chk('network: pairs', _ncomp.get(2, 0), 7, 0, '')
+    chk('network: triples', _ncomp.get(3, 0), 3, 0, '')
+    for m in ('REVEAL', 'GLADM35'):
+        _c = pd.read_csv(_cnp[m])
+        chk(f'network: linked hotspots, {m}', int((_c.degree > 0).sum()), 23, 0, '')
+    _px = os.path.join(A.dir, 'corridor_proximity.csv')
+    if os.path.exists(_px):
+        _p = pd.read_csv(_px); _l = _p[_p.linked == True]
+        _in = _l[_l.sep_over_width < 1]; _out = _l[_l.sep_over_width >= 1]
+        chk('network: linked pairs within one corridor width', len(_in), 2, 0, '')
+        chk('network: Bouvet-Meteor separation', float(_in[(_in.a + _in.b).str.contains('Bouvet') & (_in.a + _in.b).str.contains('Meteor')].sep_km.iloc[0]), 232, 0.5, ' km')
+        chk('network: Lord Howe-Tasmantid separation', float(_in[(_in.a + _in.b).str.contains('Lord Howe')].sep_km.iloc[0]), 720, 0.5, ' km')
+        chk('network: other linked pairs', len(_out), 14, 0, '')
+        chk('network: least widths apart', round(float(_out.sep_over_width.min()), 1), 1.4, 0, '')
+        chk('network: most widths apart', round(float(_out.sep_over_width.max()), 1), 3.7, 0, '')
+        chk('network: widest linked separation', float(_out.sep_km.max()), 1899, 0.5, ' km')
+    else:
+        missing.append('corridor_proximity.csv')
+else:
+    missing.append('corridor_network_<model>.csv')
+
 _n_stale = provenance_report(A.dir, A.tag)
 _n_stale += freshness.report(A.dir, A.tag)
 

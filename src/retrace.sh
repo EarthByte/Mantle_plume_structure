@@ -340,6 +340,20 @@ step_corridors () {
 
 # ---------------------------------------------------------------- 7. geometry
 step_geometry () {
+  # Corridor overlap and network membership first, for every model with corridors:
+  # corridor_ridge_association.py, plume_geometry.py, corridor_proximity_control.py,
+  # Figure 1's links and Table S1's Links and Network columns all read them, and none of
+  # those would notice an overlap file left over from an earlier set of corridors.
+  local m tag file var every zmax
+  for m in "${MODELS[@]}"; do
+    IFS='|' read -r tag file var every zmax <<< "$m"
+    [ -f "out/corridor_masks_$tag.npz" ] || continue
+    python3 corridor_network.py --tag "$tag" 2>&1 | tee "logs/corridor_network_$tag.log"
+    [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
+  done
+  python3 corridor_proximity_control.py --overlap out/corridor_overlap_RevealLO.csv \
+      --summary out/corridor_summary_RevealLO.csv 2>&1 | tee logs/corridor_proximity.log
+  [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
   python3 corridor_ridge_association.py --tag RevealLO 2>&1 | tee logs/ridge_assoc.log
   [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
   python3 plume_geometry.py --tag RevealLO 2>&1 | tee logs/plume_geometry.log

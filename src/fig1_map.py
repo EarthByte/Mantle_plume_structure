@@ -54,10 +54,11 @@ ap.add_argument('--min-families', type=int, default=3, dest='min_families',
                      'the other draws an outline inconsistent with the symbols '
                      'it is meant to support')
 ap.add_argument('--label', default=(
-    'Hawaii,Louisville,Afar,Comores,Bouvet,Meteor,Iceland,Jan Mayen,Marion,'
-    'Australia E,Tahiti/Society,Pitcairn'),
-    help='hotspots to name on the map, comma separated. The default is the twelve '
-         'drawn as cross-sections, which are the ones a reader needs to locate. '
+    'Hawaii,Yellowstone,Baja/Guadalupe,Louisville,Kerguelen(Heard),Reunion,Marion,'
+    'Bouvet,Meteor,Discovery,Lord Howe (Tasman East),Tasmanid (Tasman central)'),
+    help='hotspots to name on the map, comma separated, as spelled in the hotspot '
+         'table. The default is the hotspots the text discusses as examples, which '
+         'the caption says the labels identify. '
          'The printed map is 16 by 8 cm and a name set at the 8 pt floor is about '
          '1.7 cm long, so eighteen names do not fit however they are arranged; '
          'that is geometry, not a placement failure.')
@@ -229,6 +230,9 @@ _occupied.append((-MAP_CM / 2, -MAP_CM / 4, -MAP_CM / 2 + _EDGE, MAP_CM / 4))
 _occupied.append((-MAP_CM / 2, -MAP_CM / 4, MAP_CM / 2, -MAP_CM / 4 + _EDGE))
 
 _want = [x.strip() for x in A.label.split(',') if x.strip()]
+# Printed names: the hotspot table's names carry qualifiers the text does not use.
+SHOW = {'Kerguelen(Heard)': 'Kerguelen', 'Lord Howe (Tasman East)': 'Lord Howe',
+        'Tasmanid (Tasman central)': 'Tasmantid', 'Reunion': 'Réunion'}
 _miss = [n for n in _want if n not in hs.index]
 # Two rings of candidate positions. The inner ring keeps a name against its own
 # symbol, which is what a reader wants; the outer is tried only when the inner is
@@ -244,7 +248,7 @@ for n in _want:
         continue
     lo, la = float(hs.loc[n, 'lon_180']), float(hs.loc[n, 'lat'])
     cx, cy = _moll(lo, la)
-    w, h = _ch * 0.60 * len(n) + 0.10 * S, _LH
+    w, h = _ch * 0.60 * len(SHOW.get(n, n)) + 0.10 * S, _LH
     for just, dx, dy in _cands:
         bx = cx + dx + (w / 2 if just == 'ML' else -w / 2 if just == 'MR' else 0)
         b = _box(bx, cy + dy, w, h)
@@ -253,7 +257,7 @@ for n in _want:
         if _hits(b, _occupied):
             continue
         _occupied.append(b)
-        _lx.append(lo); _ly.append(la); _lt.append(n); _lj.append((just, dx, dy))
+        _lx.append(lo); _ly.append(la); _lt.append(SHOW.get(n, n)); _lj.append((just, dx, dy))
         break
     else:
         _unplaced.append(n)

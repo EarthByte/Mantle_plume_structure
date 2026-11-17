@@ -103,8 +103,13 @@ cax = fig.add_subplot(gs[2, 0:3])
 cb = fig.colorbar(pc, cax=cax, orientation='horizontal', extend='both')
 cb.set_label('Shear-velocity anomaly from the shell mean (%)')
 
+# Only the depths the profile panels show: a line running past the axes is clipped in
+# the drawing but still occupies the space above the panel, where the label sits.
+ZLIM = (300, 2800)
 P = pd.read_csv(os.path.join(A.dir, 'tasman_plume_site_profile.csv'))
 C = pd.read_csv(os.path.join(A.dir, 'tasman_slab_compare.csv'))
+P = P[P.depth.between(*ZLIM)]
+C = C[C.depth.between(*ZLIM)]
 for r, (L, xl) in enumerate((('g', 'Anomaly at the proposed conduit (%)'),
                              ('h', 'Ribbon minus window (%)'))):
     ax = fig.add_subplot(gs[r, 3])
@@ -117,7 +122,7 @@ for r, (L, xl) in enumerate((('g', 'Anomaly at the proposed conduit (%)'),
             g = C[C.model == tag]
             ax.plot(g.ribbon_minus_window, g.depth, color=COL[tag], lw=1.2)
     ax.axvline(0, color=FS.GRY, lw=0.8)
-    ax.set_ylim(2800, 300)
+    ax.set_ylim(ZLIM[1], ZLIM[0])
     ax.set_xlim(-2.4, 1.2)
     ax.set_xlabel(xl)
     ax.set_ylabel('Depth (km)')
