@@ -1,5 +1,5 @@
 {
-  "title": "Mantle_plume_structure: code and figures for \"Mantle plume conduits are most prominent beneath the mid-mantle viscosity increase\"",
+  "title": "Mantle_plume_structure: code and figures for \"Full-waveform tomography reveals deep mantle plume conduits with non-unique source regions\"",
   "version": "1.0.0",
   "upload_type": "software",
   "license": "MIT",
@@ -24,14 +24,11 @@
     "seismic tomography",
     "least-cost path",
     "mantle viscosity",
-    "GPlates"
+    "GPlates",
+    "full-waveform inversion",
+    "Tasmantid",
+    "Lord Howe"
   ],
-  "related_identifiers": [
-    {
-      "relation": "isSupplementTo",
-      "identifier": "https://github.com/EarthByte/Mantle_plume_structure",
-      "resource_type": "software"
-    }
-  ],
-  "description": "<p>Analysis code and figures for the paper <em>Mantle plume conduits are most prominent beneath the mid-mantle viscosity increase</em> (Müller, Fichtner and Schiller, Geochemistry, Geophysics, Geosystems). Conduits are traced as least-cost descending paths through five global tomographic shear-velocity models beneath 49 hotspots and 300 ambient locations, calibrated against injected synthetic conduits and analysed by depth against the ambient population. README.md gives the layout, the inputs, the commands and the licences.</p>"
+  "description": "<p>Analysis code and figures for the paper <em>Full-waveform tomography reveals deep mantle plume conduits with non-unique source regions</em> (Müller, Fichtner and Schiller, submitted to Geochemistry, Geophysics, Geosystems).</p><p>Whether global tomography resolves mantle plume conduits was disputed for two decades, and the debate largely subsided: ray-based whole-mantle models changed little over the following decade, and the vertical smoothing that had made early finite-frequency models appear plume-rich was itself called into question. Nonlinear full-waveform inversion, fit to far larger seismic datasets, now resolves whole-mantle structure differently, making it timely to revisit these questions. The full-waveform models REVEAL and RevealLO now show slow columns beneath most hotspots, opening opportunities for detailed plume geometry analysis. We trace least-cost descending paths beneath 49 hotspots and from 300 ambient locations (sites at least 1500 km from any hotspot, used throughout as a control for what the search itself can produce), calibrate them with injected synthetic conduits, and analyse their properties by depth against the ambient population. A connected slow column reaches the base of the mantle beneath 22–27% of hotspots against 4–7% of random sites, a contrast other tomography models render weakly or not at all. However, many plume columns are shown to be intermittent. Hotspot conduits are more prominent beneath the lower mantle viscosity increase inferred across 800–1200 km rather than above it. In RevealLO, our preferred model, hotspot paths are more inclined than ambient paths at 1000–1500 km (19° against 14°, P = 0.003) and nowhere else. Deflections show no horizon: the 800–1200 km range of the viscosity increase holds at most 1.5 times the deflections expected from its thickness, ambient paths deflect at the same depths, and corridor width grows smoothly with depth as the resolving length. The lower mantle viscosity increase is thus expressed as plume column prominence and inclination beneath it. Traced endpoints lie within the low-velocity provinces 2.6 times more often than matched ambient endpoints, at no preferred position, and 33 of 49 hotspots have a second column within 3% of cost ending a median 808 km away. Tomography with the current generation of models therefore does not always uniquely determine an individual plume's source, even where plume conduits are imaged.</p><p>README.md gives the layout, the inputs, the commands and the licences. The tomographic models are not redistributed.</p>",
+  "publication_date": "2026-11-16"
 }

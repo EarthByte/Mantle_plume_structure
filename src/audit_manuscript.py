@@ -20,8 +20,18 @@ ap.add_argument('--tag', default='RevealLO',
                 help='the model whose outputs are checked. The audit was written for '
                      'the paper model and had no way to say so, which is also why it '
                      'could not check its own inputs.')
-ap.add_argument('--ms', default='../manuscript/G3_MS_v11.md')
-ap.add_argument('--si', default='../manuscript/G3_SI_v7.md')
+# The default is the newest version on disk, not a fixed name: a fixed default went stale
+# twice (v11/v7 checked long after v13 existed, then v13 after v16), and retrace.sh calls
+# this with no override, so a stale default silently audits an old manuscript.
+def _newest(kind):
+    import glob, re
+    fs = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..',
+                                'manuscript', f'G3_{kind}_v*.md'))
+    v = [(int(re.search(r'_v(\d+)\.md$', f).group(1)), f) for f in fs
+         if re.search(r'_v(\d+)\.md$', f)]
+    return max(v)[1] if v else None
+ap.add_argument('--ms', default=_newest('MS'))
+ap.add_argument('--si', default=_newest('SI'))
 ap.add_argument('--expect', default='manuscript_expect.json',
                 help='label -> value the current manuscript quotes; a label mapped '
                      'to null is a claim the paper no longer makes and its check is '
@@ -279,6 +289,47 @@ for occ, q in ((1.0, 250), (0.75, 277), (0.5, 326), (0.25, 365), (0.1, 378)):
     if occ in dg.index:
         chk(f'continuity, {100*occ:.0f} per cent occupancy', float(dg.loc[occ]), q, 2, 'km')
 
+# The occupancy bound of Section 3.6 and Text S2, from occupancy_bound.csv. These were
+# unaudited until the meridian retrace moved RevealLO's 50% test from P = 0.058 to 0.048,
+# which changed a sentence in the Discussion; the claims now cannot drift silently.
+_obp = os.path.join(A.dir, 'occupancy_bound.csv')
+if os.path.exists(_obp):
+    _ob = pd.read_csv(_obp)
+    def _obv(m, o, c):
+        return float(_ob[(_ob.model == m) & (_ob.occupancy == o)][c].iloc[0])
+    chk('occupancy, observed median, RevealLO', _obv('RevealLO', 1.0, 'observed_median'), 561, 1, 'km')
+    chk('occupancy, observed median, RevealLO_30km', _obv('RevealLO_30km', 1.0, 'observed_median'), 571, 1, 'km')
+    chk('occupancy, observed median, GLADM35', _obv('GLADM35', 1.0, 'observed_median'), 584, 1, 'km')
+    chk('occupancy, observed median, SEMUCB-WM1', _obv('SEMUCB-WM1', 1.0, 'observed_median'), 511, 1, 'km')
+    chk('occupancy, uninjected median, RevealLO', _obv('RevealLO', 1.0, 'uninjected_median'), 641, 1, 'km')
+    chk('occupancy 50%, P, RevealLO', _obv('RevealLO', 0.5, 'P'), 0.048, 0.0006, '')
+    chk('occupancy 50%, P, RevealLO_30km', _obv('RevealLO_30km', 0.5, 'P'), 0.013, 0.0006, '')
+    for o, q in ((1.0, 4), (0.75, 4), (0.5, 4), (0.25, 0), (0.1, 0)):
+        chk(f'occupancy {100*o:.0f}%, runs excluding', float(_ob[_ob.occupancy == o]['excluded'].sum()), q, 0, '')
+    _x = _ob.injected_median > _ob.observed_median
+    chk('occupancy 10%, runs with injected median above observed', float(_x[_ob.occupancy == 0.1].sum()), 3, 0, '')
+    chk('occupancy 25%, runs with injected median above observed', float(_x[_ob.occupancy == 0.25].sum()), 1, 0, '')
+else:
+    print('  occupancy_bound.csv not on disk; run occupancy_bound.py')
+
+# Section 3.8, first paragraph: observed against uninjected corridor widths, per model,
+# with the two-sided Mann-Whitney test the sentence reports.
+from scipy.stats import mannwhitneyu as _mwu
+for tag, qo, qa, qp in (('RevealLO', 561, 641, 0.18), ('RevealLO_30km', 571, 563, 0.95),
+                        ('GLADM35', 584, 590, 0.81), ('SEMUCB-WM1', 511, 584, 0.023)):
+    _sw = sorted(glob.glob(os.path.join(A.dir, f'corridor_width_calibration_{tag}_dutysweep*.csv')))
+    _os = os.path.join(A.dir, f'corridor_summary_{tag}.csv')
+    if not _sw or not os.path.exists(_os):
+        chk(f'observed vs uninjected, {tag}, files present', 0, 1, 0, '')
+        continue
+    _s = pd.read_csv(_sw[-1]); _o = pd.read_csv(_os)
+    _ow = pd.to_numeric(_o[_o.ok == True]['width_med_0.02'], errors='coerce')
+    _ow = _ow[np.isfinite(_ow) & (_ow > 0)]
+    _aw = pd.to_numeric(_s[_s.injected_radius == 0].width, errors='coerce').dropna()
+    chk(f'observed vs uninjected, observed median, {tag}', float(_ow.median()), qo, 1, 'km')
+    chk(f'observed vs uninjected, uninjected median, {tag}', float(_aw.median()), qa, 1, 'km')
+    chk(f'observed vs uninjected, two-sided P, {tag}', float(_mwu(_ow, _aw).pvalue), qp, 0.006 if qp > 0.05 else 0.0006, '')
+
 # grouping and geochemistry
 gg = os.path.join(A.dir, 'geochem_geometry_RevealLO.csv')
 if os.path.exists(gg):
@@ -534,6 +585,16 @@ def _tol(v):
     t = f'{v!r}'
     d = len(t.split('.')[1]) if '.' in t else 0
     return 0.5 * 10 ** (-d) + 1e-12
+
+
+# The hotspot directional result quoted in Section 3.3 and Text S3 (RevealLO,
+# 660-1500 km), and the power range across the six runs at that window.
+chk('hotspot directional R, RevealLO, 660-1500 km', _cmv('RevealLO', '660-1500', 'R'), 0.156, 0.0006, '')
+chk('hotspot directional P, RevealLO, 660-1500 km', _cmv('RevealLO', '660-1500', 'P'), 0.10, 0.006, '')
+_pw = _cm[_cm.window == '660-1500']['power'].dropna()
+chk('directional power, lowest of six runs, 660-1500 km', float(_pw.min()), 0.43, 0.006, '')
+chk('directional power, highest of six runs, 660-1500 km', float(_pw.max()), 0.46, 0.006, '')
+chk('directional runs reaching P < 0.05, 660-1500 km', float((_cm[_cm.window == '660-1500']['P'] < 0.05).sum()), 0, 0, '')
 
 
 # Table S2 is generated from crossmodel_lean.csv by si_tables.py, so there is nothing
@@ -854,6 +915,68 @@ if _si_n:
 
 _n_ok, _n_seen = configs_clearing_floor(A.dir)
 chk('frozen configurations clearing the detection floor', _n_ok, _n_seen, 0)
+
+# ---------------------------------------------------------- Tasmantid and Lord Howe
+# Section 4.6 and Text S9: the regional test of Mather et al. (2026), from
+# tasman_slab_compare.py (conduit-site profile, slab classes) and tasman_split.py (caps).
+_tp = os.path.join(A.dir, 'tasman_plume_site_profile.csv')
+_tc = os.path.join(A.dir, 'tasman_slab_compare.csv')
+if os.path.exists(_tp) and os.path.exists(_tc):
+    _P = pd.read_csv(_tp)
+    _C = pd.read_csv(_tc)
+    _C['belt_minus_other'] = _C.belt - _C.other
+
+    def _pp(m, q, col='pct'):
+        r = _P[(_P.model == m) & (_P.depth == q)]
+        return float(r[col].iloc[0]) * (100.0 if col == 'pct' else 1.0)
+
+    def _cc(m, q, col):
+        g = _C[_C.model == m]
+        return float(g[col].iloc[int(np.argmin(np.abs(g.depth.to_numpy() - q)))])
+
+    chk('Tasman conduit, 660 km percentile, RevealLO', round(_pp('RevealLO', 660)), 1, 0, '')
+    chk('Tasman conduit, 660 km percentile, REVEAL', round(_pp('REVEAL', 660)), 2, 0, '')
+    chk('Tasman conduit, 660 km anomaly, RevealLO', _pp('RevealLO', 660, 'cap'), -1.47, 0.005, '%')
+    chk('Tasman conduit, 660 km anomaly, REVEAL', _pp('REVEAL', 660, 'cap'), -2.26, 0.005, '%')
+    chk('Tasman conduit, 800 km slowest in region, both Reveal',
+        float(_pp('RevealLO', 800) < 0.5 and _pp('REVEAL', 800) < 0.5), 1, 0, '')
+    _o3 = [round(_pp(m, q)) for m in ('GLADM35', 'SPiRaL', 'SEMUCB-WM1') for q in (500, 660)]
+    chk('Tasman conduit, other three models at 500-660 km, lowest percentile', min(_o3), 11, 0, '')
+    chk('Tasman conduit, other three models at 500-660 km, highest percentile', max(_o3), 18, 0, '')
+    _q15 = [round(_pp(m, 1500)) for m in ('RevealLO', 'REVEAL', 'GLADM35', 'SPiRaL')]
+    chk('Tasman conduit, 1500 km lowest percentile (four models)', min(_q15), 12, 0, '')
+    chk('Tasman conduit, 1500 km highest percentile (four models)', max(_q15), 23, 0, '')
+    chk('Tasman conduit, 2500 km percentile, RevealLO', round(_pp('RevealLO', 2500)), 63, 0, '')
+    chk('Tasman conduit, 2500 km percentile, REVEAL', round(_pp('REVEAL', 2500)), 63, 0, '')
+    chk('Tasman conduit, transition zone slow in all five (500 and 660 km)',
+        float(sum(_pp(m, q, 'cap') < 0 for m in ('RevealLO', 'REVEAL', 'GLADM35', 'SPiRaL', 'SEMUCB-WM1')
+                  for q in (500, 660))), 10, 0, '')
+    _b4 = [_cc(m, 1000, 'belt_minus_other') for m in ('RevealLO', 'REVEAL', 'GLADM35', 'SEMUCB-WM1')]
+    chk('Tasman 48-25 Ma slab vs other at 1000 km, lowest of four', min(_b4), 0.72, 0.005, '%')
+    chk('Tasman 48-25 Ma slab vs other at 1000 km, highest of four', max(_b4), 0.96, 0.005, '%')
+    chk('Tasman 48-25 Ma slab vs other at 1000 km, SPiRaL', _cc('SPiRaL', 1000, 'belt_minus_other'), 0.24, 0.005, '%')
+    chk('Tasman 48-25 Ma slab vs other at 500 km, models faster',
+        float(sum(_cc(m, 500, 'belt_minus_other') > 0 for m in ('RevealLO', 'REVEAL', 'GLADM35', 'SPiRaL', 'SEMUCB-WM1'))), 1, 0, '')
+    chk('Tasman ribbon slower than window at 660 km, models',
+        float(sum(_cc(m, 660, 'ribbon_minus_window') < 0 for m in ('RevealLO', 'REVEAL', 'GLADM35', 'SPiRaL'))), 4, 0, '')
+    _caps = []
+    for m in ('RevealLO', 'REVEAL', 'GLADM35', 'SPiRaL', 'SEMUCB-WM1'):
+        _j = json.load(open(os.path.join(A.dir, f'tasman_split_{m}.json')))['caps']
+        _caps.append((m, _j['Lord Howe']['400-660'], _j['Tasmantid']['400-660']))
+    _lh = [c for c in _caps if c[1] < c[2]]
+    chk('Tasman Lord Howe cap slower at 400-660 km, models', len(_lh), 4, 0, '')
+    chk('Tasman Lord Howe cap, strongest', min(c[1] for c in _lh), -1.45, 0.005, '%')
+    chk('Tasman Lord Howe cap, weakest', max(c[1] for c in _lh), -0.81, 0.005, '%')
+    chk('Tasman Tasmantid cap, strongest', min(c[2] for c in _lh), -0.92, 0.005, '%')
+    chk('Tasman Tasmantid cap, weakest', max(c[2] for c in _lh), -0.31, 0.005, '%')
+    # the corridor overlap that nominated the pair, in both Reveal models
+    for m in ('RevealLO', 'REVEAL'):
+        _cn = pd.read_csv(os.path.join(A.dir, f'corridor_network_{m}.csv')).set_index('site')
+        chk(f'Tasman pair in one corridor component, {m}',
+            float(_cn.loc['Lord Howe (Tasman East)', 'component'] == _cn.loc['Tasmanid (Tasman central)', 'component']
+                  and _cn.loc['Lord Howe (Tasman East)', 'degree'] > 0), 1, 0, '')
+else:
+    missing.append('tasman_plume_site_profile.csv / tasman_slab_compare.csv')
 
 _n_stale = provenance_report(A.dir, A.tag)
 _n_stale += freshness.report(A.dir, A.tag)

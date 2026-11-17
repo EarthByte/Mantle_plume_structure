@@ -77,7 +77,7 @@ a.set_ylabel('depth (km)')
 
 taus = ['0.01', '0.02', '0.05']
 vals = [sm[f'width_med_{t}'].dropna().to_numpy(float) for t in taus]
-bp = b.boxplot(vals, vert=True, widths=0.55, patch_artist=True,
+bp = b.boxplot(vals, orientation='vertical', widths=0.55, patch_artist=True,
                medianprops=dict(color=FS.INK, lw=1.8),
                flierprops=dict(marker='o', ms=3.0, mfc='none', mec=FS.GRY))
 for patch, col in zip(bp['boxes'], (FS.BLU, FS.ACC, FS.GRY)):

@@ -96,6 +96,15 @@ def load_anomaly(path, spec: ModelSpec, depth_max=None, every=1):
         order = np.argsort(depth)
         depth, arr = depth[order], arr[order]
     if lon.max() > 180.0:                      # 0-360 files
+        # A 0-360 file sampled at both ends (RevealLO.nc: 0, 0.5, ..., 360) carries the
+        # 0 deg meridian twice. Rolled to -180..180, the repeat lands in the middle of
+        # the grid, where dedupe_lon used to look for it at the ends and missed it: the
+        # RevealLO grid had 721 columns with two at 0 deg, and since the cost takes a
+        # uniform longitude spacing, every path crossing Greenwich paid for an extra
+        # half-degree column (found 20 October 2026). Drop the 360 deg column here,
+        # before the roll, after the shell mean has been taken as before.
+        if np.isclose(lon[-1] - lon[0], 360.0):
+            lon, arr = lon[:-1], arr[:, :, :-1]
         roll = int(np.sum(lon > 180.0))
         lon = np.where(lon > 180.0, lon - 360.0, lon)
         lon = np.roll(lon, roll)
@@ -113,7 +122,18 @@ def dedupe_lon(lon, arr):
     """
     lon = np.asarray(lon, float)
     if abs((float(lon[-1]) - float(lon[0])) - 360.0) < 1e-6:
-        return lon[:-1], arr[:, :, :-1]
+        lon, arr = lon[:-1], arr[:, :, :-1]
+    # The cost field takes one longitude spacing for the whole grid (path_cost.cell_widths),
+    # so a repeated or missing meridian anywhere is a silent error in every lateral step
+    # across it. Refuse such a grid rather than trace through it.
+    # The tolerance is a thousandth of the spacing: float32 coordinates (SEMUCB-WM1) wobble
+    # by about 1e-5 of it, while a repeated or missing meridian is off by the whole spacing.
+    d = np.diff(lon)
+    tol = 1e-3 * abs(d[0])
+    if not np.allclose(d, d[0], rtol=0, atol=tol):
+        bad = np.where(np.abs(d - d[0]) > tol)[0][:5]
+        raise SystemExit(f'longitude grid is not uniform after dedupe: spacing {d[0]:g} deg, '
+                         f'irregular at {[float(lon[i]) for i in bad]}')
     return lon, arr
 
 

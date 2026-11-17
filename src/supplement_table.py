@@ -16,6 +16,9 @@ ap.add_argument('--dir', default='out')
 ap.add_argument('--tag', default='RevealLO')
 ap.add_argument('--link', type=float, default=0.25)
 ap.add_argument('--out', default='out/supplement_table_S1')
+ap.add_argument('--write-si', dest='write_si', metavar='SI_MD',
+                help='replace Tables S1 and S3 in this supplement with the generated ones, '
+                     'in place, and write nothing else')
 ap.add_argument('--check-si', dest='check_si', metavar='SI_MD',
                 help='write nothing; compare Tables S1 and S3 in this supplement with what '
                      'the outputs on disk give, and exit non-zero if they differ')
@@ -184,6 +187,24 @@ _s3 = A.out.replace('S1', 'S3')
 _has3 = all(c in d.columns for c in S3)
 cols, _md1 = _table_md(s1, HEAD)
 _c3, _md3 = _table_md(d, HEAD3) if _has3 else ([], '')
+
+if A.write_si:
+    si = open(A.write_si).read().splitlines()
+    for label, md in (('S1', _md1), ('S3', _md3)):
+        if not md:
+            continue
+        want = md.strip().splitlines()
+        at = [i for i, l in enumerate(si) if l.rstrip() == want[0]]
+        if not at:
+            sys.exit(f'Table {label}: its header row is not in {A.write_si}; '
+                     'nothing written')
+        j = at[0]
+        while j < len(si) and si[j].startswith('|'):
+            j += 1
+        si = si[:at[0]] + want + si[j:]
+        print(f'Table {label} written into {A.write_si} ({len(want) - 2} rows)')
+    open(A.write_si, 'w').write('\n'.join(si) + '\n')
+    sys.exit(0)
 
 if A.check_si:
     # The supplement carries these tables pasted from the files this script writes, as

@@ -21,8 +21,20 @@ import pandas as pd
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--dir', default='out')
-ap.add_argument('--si', default='../manuscript/G3_SI_v7.md')
+def _newest_si():
+    import glob
+    v = [(int(re.search(r'_v(\d+)\.md$', f).group(1)), f)
+         for f in glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                         '..', 'manuscript', 'G3_SI_v*.md'))
+         if re.search(r'_v(\d+)\.md$', f)]
+    return max(v)[1] if v else None
+
+
+# The newest supplement on disk: the old fixed default (v7) was eight versions stale.
+ap.add_argument('--si', default=_newest_si())
 ap.add_argument('--table', default='S2', choices=['S2', 'S4', 'S5', 'S6'])
+ap.add_argument('--write', action='store_true',
+                help='replace the table in the supplement with the generated one, in place')
 ap.add_argument('--check', action='store_true',
                 help='compare the supplement against the generated table and exit '
                      'non-zero on any difference')
@@ -152,7 +164,7 @@ GEN = {'S2': table_s2, 'S4': table_s4, 'S5': table_s5, 'S6': table_s6}[A.table](
 HEAD = {'S2': r'^\| Model \| Window', 'S4': r'^\| Model \| Column reaches', 'S5': r'^\| Quantity \| Model',
         'S6': r'^\| Model \| Population \| Deflections'}[A.table]
 
-if not A.check:
+if not A.check and not A.write:
     print(GEN)
     sys.exit(0)
 
@@ -160,6 +172,10 @@ si = open(A.si).read() if os.path.exists(A.si) else ''
 m = re.search(HEAD + r'.*?(?=\n\s*\n|\Z)', si, re.M | re.S)
 if not m:
     sys.exit(f'no Table {A.table} found in {A.si}')
+if A.write:
+    open(A.si, 'w').write(si[:m.start()] + GEN.strip() + si[m.end():])
+    print(f'Table {A.table} written into {A.si}')
+    sys.exit(0)
 have = [x.rstrip() for x in m.group(0).strip().splitlines()]
 want = [x.rstrip() for x in GEN.strip().splitlines()]
 if have == want:

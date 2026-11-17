@@ -2,8 +2,8 @@
 #
 # Hotspot root classification by least-cost path search.
 #
-# Reproduces every number and figure in Müller, Fichtner & Schiller, "Which
-# Hotspots Are Rooted in the Deep Mantle?". Run from the plume_pipeline
+# Reproduces every number and figure in Müller, Fichtner & Schiller, "Full-waveform
+# tomography reveals deep mantle plume conduits with non-unique source regions". Run from the plume_pipeline
 # directory. Each model is independent, so the per-model loop can be split
 # across machines; the aggregation steps need all of them.
 #

@@ -2,9 +2,9 @@
 
 Code, figures and derived data for
 
-> Müller, R. D., Fichtner, A., & Schiller, C. J. (2026). Mantle plume conduits are most prominent beneath the mid-mantle viscosity increase. *Geochemistry, Geophysics, Geosystems*.
+> Müller, R. D., Fichtner, A., & Schiller, C. J. (2026). Full-waveform tomography reveals deep mantle plume conduits with non-unique source regions. *Geochemistry, Geophysics, Geosystems*.
 
-Whether global tomography resolves mantle plume conduits was disputed for two decades; the full-waveform models REVEAL and RevealLO now show slow columns beneath many hotspots. We trace least-cost descending paths beneath 49 hotspots and from 300 ambient locations, calibrate them against injected synthetic conduits, and analyse their properties by depth against the ambient population. A connected slow column reaches the base of the mantle beneath 22-27% of hotspots against 4-7% of random sites, a contrast other tomography models render weakly or not at all, but many plume columns are intermittent. Hotspot conduits are more prominent beneath the lower-mantle viscosity increase inferred across 800-1200 km than above it, and in RevealLO, our preferred model, hotspot paths are more inclined than ambient paths at 1000-1500 km and nowhere else. Deflections show no horizon at the viscosity increase, and corridor width grows smoothly with depth as the resolving length. Traced endpoints lie within low-velocity provinces 2.6 times more often than matched ambient endpoints, and 33 of 49 hotspots have a second column within 3% of cost ending a median 960 km away: tomography alone cannot always uniquely determine a plume's source.
+Whether global tomography resolves mantle plume conduits was disputed for two decades, and the debate largely subsided: ray-based whole-mantle models changed little over the following decade, and the vertical smoothing that had made early finite-frequency models appear plume-rich was itself called into question. Nonlinear full-waveform inversion, fit to far larger seismic datasets, now resolves whole-mantle structure differently, making it timely to revisit these questions. The full-waveform models REVEAL and RevealLO now show slow columns beneath most hotspots, opening opportunities for detailed plume geometry analysis. We trace least-cost descending paths beneath 49 hotspots and from 300 ambient locations (sites at least 1500 km from any hotspot, used throughout as a control for what the search itself can produce), calibrate them with injected synthetic conduits, and analyse their properties by depth against the ambient population. A connected slow column reaches the base of the mantle beneath 22–27% of hotspots against 4–7% of random sites, a contrast other tomography models render weakly or not at all. However, many plume columns are shown to be intermittent. Hotspot conduits are more prominent beneath the lower mantle viscosity increase inferred across 800–1200 km rather than above it. In RevealLO, our preferred model, hotspot paths are more inclined than ambient paths at 1000–1500 km (19° against 14°, *P* = 0.003) and nowhere else. Deflections show no horizon: the 800–1200 km range of the viscosity increase holds at most 1.5 times the deflections expected from its thickness, ambient paths deflect at the same depths, and corridor width grows smoothly with depth as the resolving length. The lower mantle viscosity increase is thus expressed as plume column prominence and inclination beneath it. Traced endpoints lie within the low-velocity provinces 2.6 times more often than matched ambient endpoints, at no preferred position, and 33 of 49 hotspots have a second column within 3% of cost ending a median 808 km away. Tomography with the current generation of models therefore does not always uniquely determine an individual plume's source, even where plume conduits are imaged.
 
 A conduit is represented as the **cheapest descending path** through a tomographic shear-velocity model. A step of physical length `L` through material whose anomaly is `a` per cent costs
 
@@ -16,13 +16,14 @@ so slow material is cheap to traverse and lateral wandering is penalised. Paths 
 
 Two things make a result out of that. What the search can *see* is fixed by requiring it to recover synthetic conduits of known amplitude, which puts a stated sensitivity floor on every non-detection. What *counts* as a detection is fixed by comparing each hotspot with random locations put through the identical procedure. Neither is a free choice.
 
-This repository holds the analysis code and the finished figures. The tomographic models are not redistributed (see *Model availability*); the derived tables in `data/` and the recovered conduit geometries that the figures are drawn from are archived on Zenodo (see *Citation*).
+This repository holds the analysis code and the finished figures. The tomographic models are not redistributed (see *Model availability*), so the derived products the figures are drawn from (`out/`) are not carried either: `src/run_all.sh` rebuilds them from the models.
 
 ## Layout
 
 ```
 src/            analysis and figure scripts (Python 3), and the shell drivers below
   run_all.sh          the whole workflow: trace, calibrate, classify, tabulate
+  retrace.sh          the same, step by step at the calibrated move set, with resume (FROM=<step>)
   refigure.sh         redraw every figure from what an earlier run_all.sh already wrote
   path_cost.py        the least-cost path search
   tomo_io.py          model loading, depth cropping, file screening
@@ -37,25 +38,29 @@ src/            analysis and figure scripts (Python 3), and the shell drivers be
   site_profile.py     strongest anomaly beneath a hotspot, against depth
   province.py         membership of the lowermost-mantle slow provinces
   longevity_analysis.py / longevity.py   hotspot-track longevity
-  sections_figure.py  the annular cross-section atlas (Figures 8-11, S3a-c)
+  sections_figure.py  the annular cross-section atlas (Figures 9-12, S3a-c)
+  tasman_split.py / tasman_slab_footprint.py / tasman_slab_compare.py
+                      the Tasmantid-Lord Howe test of Mather et al. (2026), Text S9
+  model_update.py     RevealLO against REVEAL, shell by shell
   fig*.py             the remaining main-text and supplementary figures
   manuscript_stats.py every statistic the paper quotes, in one file
   figcheck.py / figstyle.py   figure-legibility and label-collision checks
 data/           small inputs carried with the repository (see Inputs)
-figures/        the eleven main-text and five supplementary figures, PDF and PNG
+figures/        the twelve main-text and supplementary figures S1-S8, PDF and PNG;
+                figures/tasman_split/ holds the unnumbered regional figures behind Text S9
 ```
 
-`out/` (derived products of every step) and `results/` are not tracked; the archived copy on Zenodo lets the figures and tables rebuild from them without the tomography models. Running `src/run_all.sh` regenerates both from scratch.
+`out/` (derived products of every step) and `results/` are not tracked. Running `src/run_all.sh` regenerates both from scratch.
 
 ## Model availability
 
 **None of the tomographic model files used here are redistributed in this repository.**
 
-Every model file used in this study was provided by the Seismology and Wave Physics group at ETH Zürich. **RevealLO has not been released or formally published.** The other four are published models, obtainable from their authors at the references below; the copies used here are ETH-prepared and will not be byte-identical to the authors' own distributions, so a run from an independently obtained copy may differ in detail from the numbers in the paper.
+Every model file used in this study was provided by the Seismology and Wave Physics group at ETH Zürich. **RevealLO is described by Schiller et al. (2026) and is being archived by its authors; see the paper's Open Research section for its DOI.** The other four are published models, obtainable from their authors at the references below; the copies used here are ETH-prepared and will not be byte-identical to the authors' own distributions, so a run from an independently obtained copy may differ in detail from the numbers in the paper.
 
 | model | as used here | reference |
 |---|---|---|
-| RevealLO | 0.5°, 10 km depth, cropped at 2880 km | not yet released (ETH Zürich, Seismology and Wave Physics) |
+| RevealLO | 0.5°, 10 km depth, cropped at 2880 km | Schiller et al. (2026), ETH Zürich, Seismology and Wave Physics |
 | REVEAL | 0.5° | Thrastarson et al. (2024), *BSSA* 114, 1392-1406 |
 | GLAD-M35 | 1°, every 2nd shell | Cui et al. (2024), *GJI* 239, 478-502 |
 | SPiRaL | as distributed | Simmons et al. (2021), *GJI* 227, 1366-1391 |
@@ -87,7 +92,7 @@ python3 -m venv .venv-figcheck
 .venv-figcheck/bin/pip install -q pdfplumber
 ```
 
-Edit the `MODELS` array at the top of `src/run_all.sh` to point at your copies of the tomographic models, then
+Edit the `MODELS` array at the top of `src/run_all.sh` (and of `src/retrace.sh`) to point at your copies of the tomographic models, then
 
 ```bash
 cd src
@@ -115,13 +120,17 @@ python3 src/fig_workflow.py      # Figure 2: workflow
 python3 src/fig_corridor.py      # Figure 3: near-optimal corridor width
 python3 src/fig_lean.py          # Figure 4: directional tests of path lean
 python3 src/fig_bands.py         # Figure 5: where conduits differ from ambient mantle, by depth
-python3 src/fig_deflection.py    # Figure 6: distribution of path-deflection depths
-python3 src/fig_calibration.py   # Figure 7: synthetic calibration of corridor width
-python3 src/sections_figure.py --all              # Figures 8-11: the 49-hotspot cross-section atlas
+python3 src/fig_province.py      # Figure 6: traced endpoints and the lowermost-mantle slow provinces
+python3 src/fig_deflection.py    # Figure 7: distribution of path-deflection depths
+python3 src/fig_calibration.py   # Figure 8: synthetic calibration of corridor width
+python3 src/sections_figure.py --all              # Figures 9-12: the 49-hotspot cross-section atlas
 python3 src/fig_si_sweeps.py     # Figure S1: calibration sweeps
 python3 src/fig_si_profiles.py   # Figure S2: corridor profiles
 python3 src/sections_figure.py --top 9   # Figures S3a-c: best-constrained sections, other models
+python3 src/fig_tasman_slab.py   # Figure S4: the slab of Mather et al. (2026) over the tomography
 ```
+
+Figures S5-S8 describe how RevealLO was built (data coverage, sensitivity, the model update and the model itself). They were supplied by the model's authors and are included here as they appear in the Supporting Information; nothing in `src/` draws them.
 
 `sections_figure.py` needs `--file/--tag/--var` for the model being drawn; `refigure.sh` shows the full invocations, including the paper model's `--fix-azimuths` pass that derives the section planes every other model is then drawn on. `figures/figure_map.txt` is the authority for which file is which figure number.
 
@@ -143,7 +152,7 @@ The code in `src/` is released under the MIT licence (`LICENSE`). The figures in
 
 ## Citation
 
-Müller, R. D., Fichtner, A., & Schiller, C. J. (2026). Mantle plume conduits are most prominent beneath the mid-mantle viscosity increase. *Geochemistry, Geophysics, Geosystems*.
+Müller, R. D., Fichtner, A., & Schiller, C. J. (2026). Full-waveform tomography reveals deep mantle plume conduits with non-unique source regions. *Geochemistry, Geophysics, Geosystems*.
 
 `CITATION.cff` carries the same in machine-readable form. Please also cite the tomographic models you use, listed above.
 
@@ -151,10 +160,13 @@ Müller, R. D., Fichtner, A., & Schiller, C. J. (2026). Mantle plume conduits ar
 
 Boschi, L., Becker, T. W., & Steinberger, B. (2007). Mantle plumes: Dynamic models and seismic images. *Geochemistry, Geophysics, Geosystems*, 8, Q10006. https://doi.org/10.1029/2007GC001733
 Chase, C. G., & Wessel, P. (2021). PHT2021: Pacific hotspot track ages. Zenodo. https://doi.org/10.5281/zenodo.5576466
+Mather, B. R., Seton, M., et al. (2026). Parallel volcanic chains generated by plume-slab interaction. *Gondwana Research*, 160, 99-108. https://doi.org/10.1016/j.gr.2026.08.002
+Müller, R. D., et al. (2019). A global plate model including lithospheric deformation along major rifts and orogens since the Triassic. *Tectonics*, 38, 1884-1907. https://doi.org/10.1029/2018TC005462
 Courtillot, V., Davaille, A., Besse, J., & Stock, J. (2003). Three distinct types of hotspots in the Earth's mantle. *Earth and Planetary Science Letters*, 205, 295-308. https://doi.org/10.1016/S0012-821X(02)01048-8
 Cui, C., et al. (2024). GLAD-M35. *Geophysical Journal International*, 239, 478-502. https://doi.org/10.1093/gji/ggae270
 French, S. W., & Romanowicz, B. A. (2014). SEMUCB-WM1. *Geophysical Journal International*, 199, 1303-1327. https://doi.org/10.1093/gji/ggu334
 MacLeod, C. J., et al. (2017). Extinct and active spreading ridge segments. Supplementary dataset.
+Schiller, C. J., et al. (2026). RevealLO. Full reference in the paper.
 Simmons, N. A., et al. (2021). SPiRaL. *Geophysical Journal International*, 227, 1366-1391.
 Thrastarson, S., et al. (2024). REVEAL. *Bulletin of the Seismological Society of America*, 114, 1392-1406.
 Zahirovic, S., et al. (2022). Plate model reconstruction.

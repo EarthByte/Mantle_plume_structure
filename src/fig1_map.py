@@ -8,8 +8,12 @@ What is drawn instead are three results of a single model. The background is the
 depth slice at which the traced conduits stand out most clearly against their own
 shell, chosen by conduit_depth_slice.py rather than by eye, at high transparency
 because it is context. Filled symbols mark hotspots whose traced conduit terminates
-inside a large low-shear-velocity province and open symbols those that do not. Thin
-lines join hotspots whose corridors overlap, which is the network measurement.
+inside a large low-shear-velocity province and open symbols those that do not. A
+dashed outline marks the province mask itself, the boundary those symbols are
+tested against: grid cells where at least three of four independent tomographic
+families agree the deep mantle is anomalously slow (Text S4), not a single-model
+boundary. Thin lines join hotspots whose corridors overlap, which is the network
+measurement.
 
 No title. Every point size is given at the size the map is printed rather than the
 size it is drawn, so nothing falls below the readable floor on the page.
@@ -41,6 +45,14 @@ ap.add_argument('--lim', type=float, default=1.8,
 ap.add_argument('--link', type=float, default=0.25)
 ap.add_argument('--hotspots', default='hotspots_courtillot2003.csv')
 ap.add_argument('--out', default='../figures/fig1_map')
+ap.add_argument('--province', default=None,
+                help='the cross-model agreement map (Text S4); defaults to '
+                     '<dir>/province_vote.npz, the same file plume_geometry.py '
+                     'reads for the root_in column that fills the symbols')
+ap.add_argument('--min-families', type=int, default=3, dest='min_families',
+                help='same default as plume_geometry.py; changing one without '
+                     'the other draws an outline inconsistent with the symbols '
+                     'it is meant to support')
 ap.add_argument('--label', default=(
     'Hawaii,Louisville,Afar,Comores,Bouvet,Meteor,Iceland,Jan Mayen,Marion,'
     'Australia E,Tahiti/Society,Pitcairn'),
@@ -73,6 +85,36 @@ if sl is None:
             and f.endswith('.nc')]
     sl = os.path.join(A.dir, sorted(cand)[0]) if cand else None
 
+prov_path = A.province or os.path.join(A.dir, 'province_vote.npz')
+prov_nc = None
+if os.path.exists(prov_path):
+    zz = np.load(prov_path)
+    vote, plat, plon = zz['vote'], zz['lat'], zz['lon']
+    mask = (vote >= A.min_families).astype(float)
+    # The source grid runs -180..179 in 1-degree steps, one column short of a
+    # full circle. Left as is, GMT's global (-R d) region meets a real gap at
+    # the date line instead of wrapping - the same seam conduit_depth_slice.py
+    # avoids from the other direction, where models carry both -180 and +180
+    # and the duplicate meridian is dropped instead of, as here, completed.
+    if plon[-1] < 180.0 - 1e-6:
+        plon = np.concatenate([plon, [180.0]])
+        mask = np.concatenate([mask, mask[:, :1]], axis=1)
+    import xarray as xr
+    da = xr.DataArray(mask, coords=dict(lat=np.asarray(plat, float),
+                                         lon=np.asarray(plon, float)),
+                      dims=('lat', 'lon'), name='province',
+                      attrs=dict(long_name='LLSVP agreement mask',
+                                 min_families=A.min_families))
+    prov_nc = os.path.join(A.dir, 'llsvp_province_mask.nc')
+    da.to_netcdf(prov_nc)
+    row_frac = mask[:, :-1].mean(axis=1)
+    area_pct = 100 * float(np.average(row_frac, weights=np.cos(np.radians(plat))))
+    print(f'  LLSVP mask ({os.path.basename(prov_path)}, >= {A.min_families} of '
+          f'4 families): {area_pct:.1f}% of Earth\'s area')
+else:
+    print(f'no province agreement map at {prov_path}; the outline is left off '
+          'the map (pass --province, or run whatever wrote it)')
+
 fig = pygmt.Figure()
 pygmt.config(FONT_ANNOT_PRIMARY=pt(9.0), FONT_LABEL=pt(9.0),
              MAP_FRAME_PEN='0.7p')
@@ -94,6 +136,9 @@ if sl and os.path.exists(sl):
 else:
     print('no depth slice found; run conduit_depth_slice.py for the background')
 fig.coast(projection=proj, shorelines='0.25p,gray45', area_thresh=10000)
+if prov_nc:
+    fig.grdcontour(grid=prov_nc, projection=proj, levels=[0.5],
+                   pen='1.0p,gray20,dashed')
 
 # the network, drawn under the symbols so a line never hides a hotspot
 link = ov[ov.frac_small >= A.link]
@@ -176,7 +221,7 @@ _occupied = [_box(*_moll(lo, la), 2 * _SYM, 2 * _SYM)
 # the legend box at the bottom left, and the graticule annotations along the left
 # and bottom edges of the frame: a label overlapping either is a collision the eye
 # sees even though neither is a hotspot symbol
-_LEG_H = 3 * _LH + 0.25 * S
+_LEG_H = (4 if prov_nc else 3) * _LH + 0.25 * S
 _LEG_R, _LEG_T = MAP_CM / 2 - 0.15 * S, MAP_CM / 4 - 0.15 * S
 _occupied.append((_LEG_R - MAP_CM * 0.34, _LEG_T - _LEG_H, _LEG_R, _LEG_T))
 _EDGE = 0.9 * _ch                                   # width of the annotation gutter
@@ -228,8 +273,11 @@ leg = os.path.join(A.dir, f'_legend_{A.tag}.txt')
 with open(leg, 'w') as fh:
     # Terse: the caption carries the explanation, and a legend wide enough to
     # restate it reaches across the map into the north Atlantic hotspots.
+    if prov_nc:
+        fh.write(f'S {0.25*S}c - {0.7*S}c - 1.0p,gray20,dashed {0.75*S}c '
+                 f'LLSVP outline\n')
     fh.write(f'S {0.25*S}c c {0.34*S}c black 1.1p,white {0.75*S}c '
-             f'endpoint within a LLSVP ({len(inside)})\n')
+             f'endpoint within an LLSVP ({len(inside)})\n')
     fh.write(f'S {0.25*S}c c {0.34*S}c white 1.1p,black {0.75*S}c outside ({len(outside)})\n')
     fh.write(f'S {0.25*S}c - {0.7*S}c - 0.9p,gray25 {0.75*S}c corridors overlap ({nlink})\n')
 fig.legend(spec=leg, position=f'JTR+jTR+o{0.15*S}c/{0.15*S}c+w{MAP_CM*0.34}c',

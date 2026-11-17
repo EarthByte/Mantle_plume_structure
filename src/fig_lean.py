@@ -192,8 +192,13 @@ for k, (win, colour, lab) in enumerate(PANELS):
     # cannot do this, because line spacing there applies to every line at once and
     # either runs the two together or scatters all three.
     ax.set_xlabel('mean resultant length', fontsize=9, labelpad=5)
-    ax.text(0.5, -0.36, lab, transform=ax.transAxes, ha='center', va='top',
-            fontsize=9, linespacing=1.35)
+    # Anchored to the axis label itself, a fixed gap below it, rather than at a fixed
+    # fraction of the axes: the label's height and position change with the font and
+    # the Matplotlib version, and the fixed placement collided with it by 2 pt after
+    # an upgrade to Matplotlib 3.11 (21 October 2026).
+    ax.annotate(lab, xy=(0.5, 0.0), xycoords=ax.xaxis.label, xytext=(0, -5),
+                textcoords='offset points', ha='center', va='top', fontsize=9,
+                linespacing=1.35)
     for sp in ('top', 'right'):
         ax.spines[sp].set_visible(False)
     ax.grid(axis='x', color=FS.GRY, lw=0.5, alpha=0.35, zorder=0)

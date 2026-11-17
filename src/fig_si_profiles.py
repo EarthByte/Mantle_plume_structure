@@ -35,6 +35,7 @@ fig, axes = plt.subplots(nr, nc, figsize=(FS.PLACED_CM * FS.CM,
                                           FS.PLACED_CM * FS.CM * nr / nc * 0.92),
                          sharex=True, sharey=True)
 axes = np.atleast_2d(axes)
+labels = []
 for i, nm in enumerate(sites):
     ax = axes[i // nc, i % nc]
     g = pr[pr.site == nm]
@@ -55,9 +56,9 @@ for i, nm in enumerate(sites):
     short = nm.split('/')[0].split('(')[0].strip()
     if len(short) > 13:
         short = short[:12] + '.'
-    ax.text(0.05, 0.03, short, transform=ax.transAxes, fontsize=FS.FLOOR_PT + 0.5,
-            va='bottom',
-            ha='left', color=FS.INK, bbox=FS.mask())
+    labels.append((ax, ax.text(0.05, 0.03, short, transform=ax.transAxes,
+                               fontsize=FS.FLOOR_PT + 0.5, va='bottom', ha='left',
+                               color=FS.INK, bbox=FS.mask())))
     ax.set_xlim(0, xmax)
     ax.set_ylim(2750, 150)
 for j in range(len(sites), nr * nc):
@@ -67,6 +68,24 @@ for r in range(nr):
 for c_ in range(nc):
     axes[-1, c_].set_xlabel('width (km)')
 fig.tight_layout(w_pad=0.7, h_pad=0.7)
+# A name may run into the gap beside its panel, which is empty because the panels
+# share their axes, but not into the next panel or past the edge of the page, and it
+# is fitted to that room by measurement rather than by counting characters: the
+# width of 'Juan de Fuca' depends on the font, and in the right-hand column it ran
+# 1.3 pt past the edge (Matplotlib 3.11, 22 October 2026). Shrink towards the 7 pt
+# floor this figure is checked at, and only then shorten.
+fig.canvas.draw()
+_r = fig.canvas.get_renderer()
+for k_, (ax, t) in enumerate(labels):
+    r_, c_ = divmod(k_, nc)
+    edge = (axes[r_, c_ + 1].get_window_extent(_r).x0 if c_ + 1 < nc
+            else fig.bbox.x1)
+    avail = edge - t.get_window_extent(_r).x0 - 3.0
+    w = t.get_window_extent(_r).width
+    if w > avail:
+        t.set_fontsize(max(7.0, t.get_fontsize() * avail / w))
+        while t.get_window_extent(_r).width > avail and len(t.get_text()) > 4:
+            t.set_text(t.get_text().rstrip('.')[:-1].rstrip() + '.')
 FS.check(fig, floor=7.0)
 for ext in ('pdf', 'png'):
     fig.savefig(f'{A.out}.{ext}', bbox_inches='tight')

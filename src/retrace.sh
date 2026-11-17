@@ -18,7 +18,7 @@
 #
 # 2026-09-15: this script is now also the retrace for a change to the FROZEN
 # CONFIGURATION, not only to the move set. s was refrozen from 0.4 to 0.3 - see
-# out/path_config_RevealLO.json, whose note records why, and STATE.md. When only the
+# out/path_config_RevealLO.json, whose note records why. When only the
 # frozen configuration has changed, START AT paths:
 #
 #   FROM=paths bash retrace.sh
@@ -28,6 +28,17 @@
 # it and step_classify is right to skip. The move set does move it, which is what its
 # idempotency guard checks. Everything from paths onward reads the frozen file and must
 # be redone.
+#
+# When the MODEL changes rather than the configuration - a corrected file, or a fix to how
+# it is read (the duplicated 0 deg meridian in tomo_io, 20 October 2026) - several steps
+# would resume from outputs computed on the old model, because their recorded
+# configuration still matches. Move those aside first, then start at classify:
+#
+#   bash archive_tag.sh <label> RevealLO RevealLO_30km
+#   FROM=classify bash retrace.sh
+#
+# and read the freshness report at the end of the audit: any input older than the new
+# paths is a file this list missed.
 #
 #   bash retrace.sh              run from the first unfinished step
 #   bash retrace.sh --list       show the steps and what is already done
@@ -80,7 +91,7 @@ AMBIENT_TAGS="RevealLO GLADM35 SEMUCB-WM1"
 # while provenance sat in the list and was never called at all. The bottom of the file
 # now iterates this list, so the two cannot disagree again, and a name without a
 # matching step_ function stops the run before any work is done.
-STEPS="preflight classify paths ambient nulls columns corridors geometry calibration derived continuity provenance figures audit"
+STEPS="preflight classify paths ambient nulls columns corridors geometry calibration derived continuity tasman provenance figures audit"
 
 if [ "${1:-}" = "--list" ]; then
   for s in $STEPS; do
@@ -186,19 +197,26 @@ except Exception:
     sys.exit(1)
 PYCHK
   done
+  # When every classification is current, run_all.sh still runs - without FORCE, so it
+  # skips the classifications and does only what follows them (null snapshot, track
+  # depth, site profiles, province, manuscript stats, paths). Returning here instead left
+  # that remainder undone whenever a run had stopped after the last classification but
+  # before the end of run_all.sh, as on 21 October when SEMUCB-WM1 failed a grid check.
+  local force=1 log=logs/retrace_run_all.log
   if [ "$done_all" = 1 ]; then
-    echo "all six classifications carry the current move set and ensemble channel; not re-running"
-    return 0
+    echo "all six classifications carry the current move set and ensemble channel;"
+    echo "running the rest of run_all.sh without re-classifying"
+    force=""; log=logs/retrace_run_all_rest.log    # keep the classification log
   fi
-  FORCE=1 bash run_all.sh 2>&1 | tee logs/retrace_run_all.log
+  FORCE="$force" bash run_all.sh 2>&1 | tee "$log"
   local rc="${PIPESTATUS[0]}"
   # run_all.sh runs its standalone figures LAST, so that a label collision - a figure
   # defect, nothing to do with the computation - cannot throw away the tracing. It still
   # sets a non-zero status, and treating that as a hard stop threw away the retrace
   # instead, which is the same mistake one level up. A figure failure is recorded and
   # surfaced at the end; only a computation failure stops the run.
-  if [ "$rc" -ne 0 ] && grep -q 'done with figure failures' logs/retrace_run_all.log; then
-    grep -A2 'these figures failed their own checks' logs/retrace_run_all.log \
+  if [ "$rc" -ne 0 ] && grep -q 'done with figure failures' "$log"; then
+    grep -A2 'these figures failed their own checks' "$log" \
         > out/figure_failures.txt
     echo
     echo "!! FIGURES FAILED THEIR CHECKS, recorded in out/figure_failures.txt:"
@@ -549,6 +567,50 @@ step_continuity () {
     python3 root_robustness.py --tag "$tag" \
         2>&1 | tee logs/root_robustness_"$tag".log || rc=1
   done
+  # The second descents the manuscript also quotes but this step did not regenerate:
+  # the paper model's 30 km resampling, and the 300 null starts the split-depth and
+  # province comparisons use. Both were missed by the 29 September retrace and redone by
+  # hand on the 30th; they are here so that a retrace cannot leave them behind again.
+  # Like the hotspot run, both resume, so a stale file has to be moved aside first
+  # (archive_tag.sh) when the model itself has changed.
+  for m in "${MODELS[@]}"; do
+    IFS='|' read -r tag file var every dmax <<< "$m"
+    case "$tag" in
+      "${PAPER_MODEL}_30km")
+        python3 competing_routes.py --file "$file" --tag "$tag" --var "$var" \
+            --every "$every" --depth-max "$dmax" --lateral "$LATERAL" --ncell "$NCELL" \
+            2>&1 | tee -a logs/competing_routes_"$tag".log
+        [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1 ;;
+      "$PAPER_MODEL")
+        python3 competing_routes.py --file "$file" --tag "$tag" --var "$var" \
+            --every "$every" --depth-max "$dmax" --lateral "$LATERAL" --ncell "$NCELL" \
+            --hotspots out/null_sites_all300.csv --suffix _null \
+            2>&1 | tee -a logs/competing_routes_"$tag"_null.log
+        [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
+        # The detection veto for the continuity level (section 4.7) and the tilt
+        # recovery by continuity level (same section): both read by the audit, neither
+        # called by any runner until 20 October 2026. The tilt_recovery arguments are
+        # the ones its own provenance sidecar recorded for the published file.
+        python3 detection_veto.py --file "$file" --tag "$tag" --var "$var" \
+            --every "$every" --depth-max "$dmax" --lateral "$LATERAL" --ncell "$NCELL" \
+            --jobs "$JOBS" 2>&1 | tee logs/detection_veto_"$tag".log
+        [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
+        python3 tilt_recovery.py --file "$file" --tag "$tag" --var "$var" \
+            --every "$every" --depth-max "$dmax" --levels 100,50,35,20 \
+            --tilts 0,5,10,15,20 --sites 6 --seed 51 --lateral "$LATERAL" \
+            --ncell "$NCELL" --no-resume --dir out --out tilt_recovery_"$tag"_levels.csv \
+            2>&1 | tee logs/tilt_recovery_levels_"$tag".log
+        [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1 ;;
+    esac
+  done
+  # The spread of the path-averaged contrast across models along each RevealLO route
+  # (section 2.3), which the audit reads. It holds the RevealLO routes fixed, so it
+  # must follow the paths. route_anomaly_spread.py carries its own model table.
+  for t in RevealLO REVEAL GLADM35 SPiRaL SEMUCB-WM1; do
+    python3 route_anomaly_spread.py --model "$t" 2>&1 | tee -a logs/route_anomaly_spread.log
+    [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
+  done
+  python3 route_anomaly_spread.py --report 2>&1 | tee -a logs/route_anomaly_spread.log || rc=1
   # How much worse the least-cost route's worst cell is than it needed to be: the
   # minimax field against what the traced path accepts. This is the full form of what
   # derived writes with --accepted-only, and it is the paper model alone because the
@@ -572,6 +634,31 @@ step_continuity () {
   return "$rc"
 }
 
+
+# --------------------------------------------------- Tasmantid and Lord Howe (Text S9)
+# The regional test of Mather et al. (2026). tasman_split.py traces the two hotspots and
+# a regional start grid in every model and writes the regional volume the comparison
+# reads; it needs this run's paths and corridor masks, hence after continuity. The slab
+# footprint is a plate-model product, independent of the tomography, built once (about
+# 20 minutes, downloads the Mueller et al. 2019 age grids through GPlately) and kept.
+step_tasman () {
+  local m tag file var every dmax rc=0
+  for m in "${MODELS[@]}"; do
+    IFS='|' read -r tag file var every dmax <<< "$m"
+    [ "$tag" = "RevealLO_30km" ] && continue
+    python3 tasman_split.py --file "$file" --tag "$tag" --var "$var" --every "$every" \
+        --depth-max "$dmax" --lateral "$LATERAL" --ncell "$NCELL" \
+        2>&1 | tee logs/tasman_split_"$tag".log
+    [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
+  done
+  if [ ! -f out/tasman_slab_footprint.npz ]; then
+    python3 tasman_slab_footprint.py 2>&1 | tee logs/tasman_slab_footprint.log
+    [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
+  fi
+  python3 tasman_slab_compare.py 2>&1 | tee logs/tasman_slab_compare.log
+  [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
+  return "$rc"
+}
 
 # Every name in STEPS must have a function, checked here where the functions exist.
 # A typo in the list would otherwise surface as a skipped step rather than an error.

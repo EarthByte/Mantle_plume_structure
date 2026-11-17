@@ -12,3 +12,5 @@ openpyxl
 pygplates
 plate-model-manager
 gplately
+cartopy
+cmcrameri

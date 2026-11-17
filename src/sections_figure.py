@@ -704,7 +704,7 @@ if _ATLAS and len(PANELS) > PER:
 else:
     PAGES = [PANELS[i:i + PER] for i in range(0, len(PANELS), PER)]
 out = _A.out or os.path.join(
-    # Everything else in this study writes to Paper_plumes/figures. Writing to
+    # Everything else in this study writes to ../figures. Writing to
     # plume_pipeline/figures instead left two directories holding same-named
     # files, and the stale copy was picked up once.
     os.path.join('..', 'figures'), f'fig_wedges_{TAG}'
@@ -771,7 +771,7 @@ for pno, page in enumerate(PAGES, 1):
     # it. The box was sized only to the anchor's y before - correct for the
     # numeric tick labels immediately above it, which are short and sans
     # descenders, but not for a label with descenders in 'velocity' and
-    # 'anomaly'. Dietmar caught the box cutting through it on the first real
+    # 'anomaly'. The box was seen cutting through it on the first real
     # render; measured directly against that page, the label's ink ran 13.0 pt
     # top to bottom at its own 13.0 pt (pt_num(8.5)) size, so one full
     # font-height is exactly the missing term, not a guess.
@@ -790,7 +790,7 @@ for pno, page in enumerate(PAGES, 1):
     # compensation before - _grow was still computed from len(_legend) alone,
     # blind to the 0.15+0.77+_UNIT_H+0.10 the colour-bar branch adds on top -
     # which is why a taller unit label pushed the box up into the last row's
-    # rotated tick labels rather than only growing down: the defect Dietmar found
+    # rotated tick labels rather than only growing down: the defect seen
     # on the very next render after the label-clearance fix, and the same
     # mechanism the original 'least-cost descent under a tick label' defect
     # (see above) was.
